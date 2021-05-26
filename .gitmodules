@@ -1,0 +1,3 @@
+[submodule "norse"]
+	path = norse
+	url = git@github.com:jkiggins/norse.git
