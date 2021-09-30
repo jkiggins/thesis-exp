@@ -1,0 +1,56 @@
+topology:
+  input:
+    num: 10
+    type: "input"
+
+  lif1:
+    num: 1
+    type: "lif"
+
+  astrocyte:
+    num: 3
+    pconn: 0.2
+    adapt:
+      enabled: True
+      target: 0.1
+    tau: 0.4
+    alpha: 0.8
+
+lif_params:
+  method: "super"
+  v_reset: -0.3
+  v_th: 0.3
+
+linear_params:
+  init:
+    - "normal"
+    - 0.5
+    - 0.05
+  bias: False
+
+learning:
+  rule: "rstdp"
+  reward_fn: "seq_reward"
+  epochs: 5
+  iters_per_epoch: 50
+  correlated_inputs: True
+  decay_fn: "recent"
+  optimize: True
+
+data:
+  gen: "sequence"
+  width: 10
+  num_targets: 3
+  num_background: 100
+  steps_per_pattern: 10
+  spike_rate_range:
+    - 0.3
+    - 0.6
+
+sim:
+  dt: 0.001
+
+monitors:
+  astrocyte: True
+  spike: True
+  stdp: True

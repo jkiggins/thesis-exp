@@ -1,0 +1,34 @@
+topology:
+  input:
+    num: 1
+    type: "input"
+    
+  lif0:
+    num: 1
+    type: "lif"
+
+lif_params:
+  method: "super"
+  v_reset: -0.3
+  v_th: 0.3
+
+linear_params:
+  init:
+    - "normal"
+    - 0.5
+    - 0.05
+  bias: False
+
+astro_params:
+  
+
+data:
+  gen: "poisson_ramp"
+  width: 1
+  start: 0.01
+  stop: 2
+  steps: 1000
+  
+
+sim:
+  dt: 0.001
