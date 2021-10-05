@@ -3,7 +3,7 @@ topology:
     num: 1
     type: "input"
     
-  lif0:
+  lif:
     num: 1
     type: "lif"
 
@@ -20,15 +20,33 @@ linear_params:
   bias: False
 
 astro_params:
-  
+  state_update_algo: "astro_state_prop_inc_exp_decay"
+  tau: 100.0
+  alpha: 1.0
+
+  # Constant current
+  activity_params:
+    affect_algo: "astro_const_presynaptic_current"
+    thr: 0.3
+    const_effect: 0.5
+
+  # State target
+  # activity_params:
+  #   affect_algo: "astro_proportional_presynaptic_current"
+  #   alpha: 1.0
+  #   target: 3
 
 data:
   gen: "poisson_ramp"
   width: 1
-  start: 0.01
+  start: 0.5
   stop: 2
-  steps: 1000
-  
+  steps: 100
 
 sim:
   dt: 0.001
+  iters: 100
+  name: "AdaptNet"
+
+meta:
+  vary_astro_target: [0, 10, 10]

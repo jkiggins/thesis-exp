@@ -2,6 +2,14 @@ topology:
   input:
     num: 100
     type: "input"
+    # The syntax is [[nodes], connection_type].
+    # In this case [nodes] is represented by lif0 == [lif0.0, lif0.1, ..., lif0.n]
+    next: ["lin0"]
+
+  lin0:
+    num: 1
+    type: "linear"
+    next: ["lif0"]
     
   lif0:
     num: 1
