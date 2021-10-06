@@ -1,8 +1,10 @@
-topology:
+topology: "adapt_ff_v1"
+
+adapt_ff_v1:
   input:
     num: 1
     type: "input"
-    
+
   lif:
     num: 1
     type: "lif"
@@ -24,29 +26,49 @@ astro_params:
   tau: 100.0
   alpha: 1.0
 
+  activity_params: ""
+  
   # Constant current
-  activity_params:
-    affect_algo: "astro_const_presynaptic_current"
+  activity_params_const:
+    affect_algo: "astro_const_effect"
     thr: 0.3
     const_effect: 0.5
 
   # State target
-  # activity_params:
-  #   affect_algo: "astro_proportional_presynaptic_current"
-  #   alpha: 1.0
-  #   target: 3
+  activity_params_target:
+    affect_algo: "astro_proportional_effect"
+    alpha: 1.0
+    target: 3
+
+  # Inc/Dec band
+  activity_params_inc_dec:
+    affect_algo: "astro_inc_dec_effect"
+    inc_low_thr: 2
+    inc_step: 0.1
+    max: 0.5
+    dec_high_thr: 8
+    dec_step: 0.3
+    min: -0.5
 
 data:
   gen: "poisson_ramp"
   width: 1
-  start: 0.5
-  stop: 2
-  steps: 100
+  stops: [0.5, 2, 0.5]
+  steps: 1000
+
 
 sim:
   dt: 0.001
-  iters: 100
+  iters: 1000
   name: "AdaptNet"
 
 meta:
-  vary_astro_target: [0, 10, 10]
+  experiments: ["exp_target"]
+  
+  exp_target:
+    # Overlay on main config
+    overlay:
+      astro_params:
+        activity_params: "activity_params_target"
+        
+    vary_astro_target: [0, 10, 10]
