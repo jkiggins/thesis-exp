@@ -56,19 +56,28 @@ data:
   stops: [0.5, 2, 0.5]
   steps: 1000
 
+learning:
+  rule: "stdp"
+  decay_fn: "recent"
+  optimize: True
 
 sim:
   dt: 0.001
   iters: 1000
-  name: "AdaptNet"
+  name_fn: "_name_from_cfg"
 
 meta:
   experiments: ["exp_target"]
   
   exp_target:
-    # Overlay on main config
+    # Overlay on main config, with ranges for some parameters
+    name_fn: '_exp_name_from_cfg'
+    variation_strategy: 'foreach'
     overlay:
       astro_params:
+        # Vary tau and alpha with a linspace according to specified params
+        tau: "linspace(0, 100, 4)"
+        alpha: "linspace(0, 1.0, 4)"
         activity_params: "activity_params_target"
-        
-    vary_astro_target: [0, 10, 10]
+        activity_params_target:
+          target: 3
