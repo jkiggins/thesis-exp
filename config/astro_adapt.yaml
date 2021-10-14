@@ -37,7 +37,7 @@ astro_params:
   # State target
   activity_params_target:
     affect_algo: "astro_proportional_effect"
-    alpha: 1.0
+    alpha: -1.0
     target: 3
 
   # Inc/Dec band
@@ -53,30 +53,36 @@ astro_params:
 data:
   gen: "poisson_ramp"
   width: 1
-  stops: [0.5, 2, 0.5]
+  stops: [0.5]
   steps: 1000
 
 learning:
   rule: "stdp"
   decay_fn: "recent"
-  optimize: True
+  optimize: False
 
 sim:
   dt: 0.001
   iters: 1000
-  name_fn: "_name_from_cfg"
 
 meta:
-  experiments: ["exp_target"]
+  experiments: ["exp_vary_target"]
+
+  exp_vary_target:
+    variation_strategy: 'seq'
+    overlay:
+      astro_params:
+        activity_params: "activity_params_target"
+        activity_params_target:
+          target: "linspace(0, 10, 11)"
   
   exp_target:
     # Overlay on main config, with ranges for some parameters
-    name_fn: '_exp_name_from_cfg'
     variation_strategy: 'foreach'
     overlay:
       astro_params:
         # Vary tau and alpha with a linspace according to specified params
-        tau: "linspace(0, 100, 4)"
+        tau: "linspace(50, 150, 11)"
         alpha: "linspace(0, 1.0, 4)"
         activity_params: "activity_params_target"
         activity_params_target:
