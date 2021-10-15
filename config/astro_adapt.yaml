@@ -37,7 +37,7 @@ astro_params:
   # State target
   activity_params_target:
     affect_algo: "astro_proportional_effect"
-    alpha: -1.0
+    alpha: 1.0
     target: 3
 
   # Inc/Dec band
@@ -53,7 +53,7 @@ astro_params:
 data:
   gen: "poisson_ramp"
   width: 1
-  stops: [0.5]
+  stops: 0.5
   steps: 1000
 
 learning:
@@ -66,24 +66,64 @@ sim:
   iters: 1000
 
 meta:
-  experiments: ["exp_vary_target"]
+  experiments: ["astro_pre_rate_sweep"]
 
-  exp_vary_target:
+  # A sanity check that should produce graphs observed in a previous version of
+  # The codebase
+  sanity:
     variation_strategy: 'seq'
     overlay:
       astro_params:
         activity_params: "activity_params_target"
         activity_params_target:
-          target: "linspace(0, 10, 11)"
-  
-  exp_target:
+          target: "linspace(0, 10, 11)"          
+
+
+  # Sweep Alpha With sane values of tau, target, and other alpha
+  astro_alpha_sweep:
     # Overlay on main config, with ranges for some parameters
     variation_strategy: 'foreach'
     overlay:
       astro_params:
         # Vary tau and alpha with a linspace according to specified params
-        tau: "linspace(50, 150, 11)"
-        alpha: "linspace(0, 1.0, 4)"
+        tau: 120
+        alpha: "linspace(0, 2.0, 10)"
         activity_params: "activity_params_target"
         activity_params_target:
-          target: 3
+          target: 0
+          alpha: 1.0
+
+          
+  # Sweep Input Spike Rate With Sane values of alpha, tau, target, and other alpha
+  astro_pre_rate_sweep:
+    # Overlay on main config, with ranges for some parameters
+    variation_strategy: 'foreach'
+    overlay:
+      data:
+        stops: "linspace(0.1, 2.0, 10)"
+      astro_params:
+        # Vary tau and alpha with a linspace according to specified params
+        tau: 120
+        alpha: 0.22
+        activity_params: "activity_params_target"
+        activity_params_target:
+          target: 1
+          alpha: 1.0
+
+
+  # Sweep Tau with input containing a frequency spike
+  astro_tau_sweep:
+    # Overlay on main config, with ranges for some parameters
+    variation_strategy: 'foreach'
+    overlay:
+      data:
+        stops: [0.2, 0.5, 0.6, 5, 0.6, 0.5, 0.2]
+      astro_params:
+        # Vary tau and alpha with a linspace according to specified params
+        tau: "linspace(0, 100, 20)"
+        alpha: 0.22
+        activity_params: "activity_params_target"
+        activity_params_target:
+          target: 0
+          alpha: 1.0
+
