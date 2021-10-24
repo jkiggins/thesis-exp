@@ -4,10 +4,26 @@ adapt_ff_v1:
   input:
     num: 1
     type: "input"
+    next: ["linear"]
+    last: null
+
+  linear:
+    num: 1
+    type: "linear"
+    next: ["lif"]
+    last: ["input"]
 
   lif:
     num: 1
     type: "lif"
+    last: ["linear", "astro"]
+    next: null
+
+  astro:
+    num: 1
+    type: "astro"
+    last: ["lif"]
+    next: ["linear"]
 
 lif_params:
   method: "super"
@@ -22,38 +38,27 @@ linear_params:
   bias: False
 
 astro_params:
-  state_update_algo: "astro_state_prop_inc_exp_decay"
-  tau: 100.0
-  alpha: 1.0
-
-  activity_params: ""
+  alpha: null
+  tau: null
   
-  # Constant current
-  activity_params_const:
-    affect_algo: "astro_const_effect"
-    thr: 0.3
-    const_effect: 0.5
+  state_update_algo: ""
+  effect_params: ""
 
   # State target
   activity_params_target:
-    affect_algo: "astro_proportional_effect"
+    effect_algo: "astro_proportional_target_effect"
     alpha: 1.0
     target: 3
 
-  # Inc/Dec band
-  activity_params_inc_dec:
-    affect_algo: "astro_inc_dec_effect"
-    inc_low_thr: 2
-    inc_step: 0.1
-    max: 0.5
-    dec_high_thr: 8
-    dec_step: 0.3
-    min: -0.5
-
+  # Exp average state vs presynaptic activity
+  activity_params_pre:
+    effect_algo: "astro_proportional_effect"
+    alpha: 1.0
+    
 data:
   gen: "poisson_ramp"
   width: 1
-  stops: 0.5
+  stops: null
   steps: 1000
 
 learning:
@@ -66,64 +71,31 @@ sim:
   iters: 1000
 
 meta:
-  experiments: ["astro_pre_rate_sweep"]
+  experiments: ["astro_adapt_post_target"]
 
-  # A sanity check that should produce graphs observed in a previous version of
-  # The codebase
-  sanity:
-    variation_strategy: 'seq'
-    overlay:
-      astro_params:
-        activity_params: "activity_params_target"
-        activity_params_target:
-          target: "linspace(0, 10, 11)"          
-
-
-  # Sweep Alpha With sane values of tau, target, and other alpha
-  astro_alpha_sweep:
-    # Overlay on main config, with ranges for some parameters
-    variation_strategy: 'foreach'
-    overlay:
-      astro_params:
-        # Vary tau and alpha with a linspace according to specified params
-        tau: 120
-        alpha: "linspace(0, 2.0, 10)"
-        activity_params: "activity_params_target"
-        activity_params_target:
-          target: 0
-          alpha: 1.0
-
-          
-  # Sweep Input Spike Rate With Sane values of alpha, tau, target, and other alpha
-  astro_pre_rate_sweep:
+  astro_adapt_post_target:
     # Overlay on main config, with ranges for some parameters
     variation_strategy: 'foreach'
     overlay:
       data:
-        stops: "linspace(0.1, 2.0, 10)"
+        stops: [0.2]
       astro_params:
         # Vary tau and alpha with a linspace according to specified params
-        tau: 120
-        alpha: 0.22
-        activity_params: "activity_params_target"
-        activity_params_target:
-          target: 1
-          alpha: 1.0
+        state_update_algo: "astro_state_prop_inc_exp_decay"
+        tau: 80
+        alpha: 0.01
+        
+        effect_params: "activity_params_target"
 
 
-  # Sweep Tau with input containing a frequency spike
-  astro_tau_sweep:
+  astro_adapt_pre:
     # Overlay on main config, with ranges for some parameters
     variation_strategy: 'foreach'
     overlay:
       data:
-        stops: [0.2, 0.5, 0.6, 5, 0.6, 0.5, 0.2]
+        stops: [0.2]
       astro_params:
-        # Vary tau and alpha with a linspace according to specified params
-        tau: "linspace(0, 100, 20)"
-        alpha: 0.22
-        activity_params: "activity_params_target"
-        activity_params_target:
-          target: 0
-          alpha: 1.0
-
+        state_update_algo: "astro_state_exp_avg"
+        tau: 80
+        alpha: 0.01
+        effect_params: "activity_params_pre"
