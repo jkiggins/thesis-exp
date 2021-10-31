@@ -1,30 +1,12 @@
 topology: "adapt_ff_v1"
 
 adapt_ff_v1:
-  input:
-    num: 1
-    type: "input"
-    next: ["linear"]
-    last: null
+  num_inputs: 1
+  
+adapt_ff_v2:
+  num_inputs: 1
 
-  linear:
-    num: 1
-    type: "linear"
-    next: ["lif"]
-    last: ["input"]
-
-  lif:
-    num: 1
-    type: "lif"
-    last: ["linear", "astro"]
-    next: null
-
-  astro:
-    num: 1
-    type: "astro"
-    last: ["lif"]
-    next: ["linear"]
-
+  
 lif_params:
   method: "super"
   v_reset: -0.3
@@ -48,7 +30,7 @@ astro_params:
   activity_params_target:
     effect_algo: "astro_proportional_target_effect"
     alpha: 1.0
-    target: 3
+    target: 0.0
 
   # Exp average state vs presynaptic activity
   activity_params_pre:
@@ -71,31 +53,86 @@ sim:
   iters: 1000
 
 meta:
-  experiments: ["astro_adapt_post_target"]
+  experiments:
+    - "astro_adapt_post_target"
+    # - "astro_adapt_post_target_multi"
+    # - "astro_adapt_pre"
+    # - "astro_adapt_pre_multi"
 
-  astro_adapt_post_target:
+  astro_adapt_post_target: &at1
     # Overlay on main config, with ranges for some parameters
     variation_strategy: 'foreach'
+    graphs: ['range_v_state_alpha', 'volume_v_state_alpha']
     overlay:
+      topology: "adapt_ff_v1"
+      adapt_ff_v1:
+        num_inputs: 1
       data:
-        stops: [0.2]
+        stops: [0.2, 5, 0.2]
       astro_params:
-        # Vary tau and alpha with a linspace according to specified params
         state_update_algo: "astro_state_prop_inc_exp_decay"
         tau: 80
-        alpha: 0.01
+        alpha: "linspace(0.1, 1.5, 10)"
         
         effect_params: "activity_params_target"
+        activity_params_target:
+          alpha: 1.0
+          target: 0.0
 
 
-  astro_adapt_pre:
+  astro_adapt_post_target_multi:
+    # __inherit__: *at1
+    overlay:
+      adapt_ff_v1:
+        num_inputs: 3
+      data:
+        width: 3
+        stops:
+          - [0.2]
+          - [0.5]
+          - [0.01]
+      linear_params:
+        init:
+          - "normal"
+          - 0.05
+          - 0.01
+
+
+  astro_adapt_pre: &at2
     # Overlay on main config, with ranges for some parameters
     variation_strategy: 'foreach'
+    graphs: ['range_v_state_alpha', 'volume_v_state_alpha']
     overlay:
+      topology: "adapt_ff_v2"
+      adapt_ff_v2:
+        astro_after_linear: False
       data:
         stops: [0.2]
       astro_params:
         state_update_algo: "astro_state_exp_avg"
-        tau: 80
-        alpha: 0.01
+        alpha: 0.001
+        
         effect_params: "activity_params_pre"
+        activity_params_pre:
+          alpha: -3.0
+
+
+  astro_adapt_pre_multi:
+    __inherit__: *at2
+    overlay:
+      adapt_ff_v2:
+        num_inputs: 3
+      data:
+        width: 3
+        stops:
+          - [0.2]
+          - [0.5]
+          - [0.01]
+      linear_params:
+        init:
+          - "normal"
+          - 0.05
+          - 0.01
+      astro_params:
+        activity_params_pre:
+          alpha: -0.2
