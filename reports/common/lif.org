@@ -1,0 +1,29 @@
+* SNN Models
+The norse SNN simulation framework comes with a few varients of spiking neurons
+1. Generic LIF
+2. Coba LIF
+3. Izhikevich
+4. Leaky Integrator
+5. Adex LIF
+6. Correlation LIF
+7. Refractory LIF
+8. Exponential LIF
+9. Multi-Compartment LIF
+10. LIF with threshold adaptation
+
+** Generic LIF
+The generic LIF is Governed by the following equations
+
+\[
+\frac{di}{dt} = -\Tau_{syn} * i(t) \\
+i(t + 1) = \frac{di}{dt} * \Delta t + z(t) \\
+\frac{d_{vm}}{dt} = -\Tau_{mem} * (v_{leak} - v_m(t)) + \frac{i(t)}{dt} \\
+v(t + 1) = \frac{d_{vm}}{dt} * \Delta t
+\]
+
+The equation for $v_m$ is overridden in the case of a spike, and the membrane
+voltage is instead set to $v_{reset}$. This model is best thought of as a RC
+circuit. Input voltage spikes are applied to a conductance (weight), which
+results in some current flowing into a 1F capacitor (the membrane voltage). This
+explains the mixed use of voltage and current, as well as $dv$ increasing with
+input current.

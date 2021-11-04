@@ -20,9 +20,6 @@ linear_params:
   bias: False
 
 astro_params:
-  alpha: null
-  tau: null
-  
   state_update_algo: ""
   effect_params: ""
 
@@ -35,7 +32,6 @@ astro_params:
   # Exp average state vs presynaptic activity
   activity_params_pre:
     effect_algo: "astro_proportional_effect"
-    alpha: 1.0
     
 data:
   gen: "poisson_ramp"
@@ -107,14 +103,15 @@ meta:
       adapt_ff_v2:
         astro_after_linear: False
       data:
-        stops: [0.2]
+        stops: [0.2, 1, 0.2, 1, 0.2]
       astro_params:
         state_update_algo: "astro_state_exp_avg"
-        alpha: 0.001
+        alpha1: 0.005
+        alpha2: 0.02
         
         effect_params: "activity_params_pre"
         activity_params_pre:
-          alpha: -3.0
+          alpha: -0.7
 
 
   astro_adapt_pre_multi:

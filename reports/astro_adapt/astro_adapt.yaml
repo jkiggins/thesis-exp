@@ -1,0 +1,144 @@
+topology: "adapt_ff_v1"
+
+adapt_ff_v1:
+  num_inputs: 1
+  
+adapt_ff_v2:
+  num_inputs: 1
+
+  
+lif_params:
+  method: "super"
+  v_reset: -0.3
+  v_th: 0.3
+
+linear_params:
+  init:
+    - "normal"
+    - 0.5
+    - 0.05
+  bias: False
+
+astro_params:
+  state_update_algo: ""
+  effect_params: ""
+
+  # State target
+  activity_params_target:
+    effect_algo: "astro_proportional_target_effect"
+    alpha: 1.0
+    target: 0.0
+
+  # Exp average state vs presynaptic activity
+  activity_params_pre:
+    effect_algo: "astro_proportional_effect"
+    
+data:
+  gen: "poisson_ramp"
+  width: 1
+  stops: null
+  steps: 1000
+
+learning:
+  rule: "stdp"
+  decay_fn: "recent"
+  optimize: False
+
+sim:
+  dt: 0.001
+  iters: 1000
+
+meta:
+  experiments:
+    # - "astro_adapt_post_target-alpha"
+    # - "astro_adapt_post_target_tau"
+    - 'astro_adapt_post_target_multi_v2'
+
+  astro_adapt_post_target_alpha:
+    # Overlay on main config, with ranges for some parameters
+    variation_strategy: 'foreach'
+    graphs: ['range_v_state_alpha', 'volume_v_state_alpha']
+    overlay:
+      topology: "adapt_ff_v1"
+      adapt_ff_v1:
+        num_inputs: 1
+      data:
+        stops: [0.2, 5, 0.2]
+      astro_params:
+        state_update_algo: "astro_state_prop_inc_exp_decay"
+        tau: 80
+        alpha: "linspace(0.1, 1.5, 10)"
+        
+        effect_params: "activity_params_target"
+        activity_params_target:
+          alpha: 1.0
+          target: 0.0
+
+  astro_adapt_post_target_tau:
+    # Overlay on main config, with ranges for some parameters
+    variation_strategy: 'foreach'
+    graphs: ['range_v_state_tau', 'volume_v_state_tau']
+    overlay:
+      topology: "adapt_ff_v1"
+      adapt_ff_v1:
+        num_inputs: 1
+      data:
+        stops: [0.2, 5, 0.2]
+      astro_params:
+        state_update_algo: "astro_state_prop_inc_exp_decay"
+        tau: "linspace(0.0, 100.0, 10.0)"
+        alpha: 0.5
+            
+        effect_params: "activity_params_target"
+        activity_params_target:
+          alpha: 1.0
+          target: 0.0
+
+
+  astro_adapt_post_target_multi:
+    # Overlay on main config, with ranges for some parameters
+    variation_strategy: 'foreach'
+    graphs: ['range_v_state_alpha', 'volume_v_state_alpha']
+    overlay:
+      topology: "adapt_ff_v1"
+      adapt_ff_v1:
+        num_inputs: 2
+      data:
+        stops: [[0.2], [0.5]]
+        width: 2
+      astro_params:
+        state_update_algo: "astro_state_prop_inc_exp_decay"
+        tau: 80
+        alpha: "linspace(0.1, 1.5, 10)"
+            
+        effect_params: "activity_params_target"
+        activity_params_target:
+          alpha: 1.0
+          target: 0.0
+
+
+  astro_adapt_post_target_multi_v2:
+    # Overlay on main config, with ranges for some parameters
+    variation_strategy: 'foreach'
+    graphs: ['volume_v_timesteps']
+    overlay:
+      sim:
+        iters: 1000
+      topology: "adapt_ff_v1"
+      adapt_ff_v1:
+        num_inputs: 10
+      data:
+        gen: "temporal"
+        timesteps: "linspace(5, 160, 10)"
+        gap: 100
+        width: 10
+        cycles: 2
+      astro_params:
+        state_update_algo: "astro_state_prop_inc_exp_decay"
+        tau: 80
+        alpha: 0.3
+            
+        effect_params: "activity_params_target"
+        activity_params_target:
+          alpha: 1.0
+          target: 0.0
